@@ -98,8 +98,8 @@ entries:
   id: default-authentication-login
   model: authentik_stages_user_login.userloginstage
 - identifiers:
-    name: default-authentication-flow-captcha
-  id: default-authentication-flow-captcha
+    name: scribe-captcha
+  id: scribe-captcha
   model: authentik_stages_captcha.captchastage
   attrs:
     api_url: https://www.recaptcha.net/recaptcha/api/siteverify
@@ -129,8 +129,8 @@ entries:
   model: authentik_flows.flowstagebinding
 - identifiers:
     target: !KeyOf flow
-    stage: !KeyOf default-authentication-flow-captcha
-    order: 40
+    stage: !KeyOf scribe-captcha
+    order: 50
   id: flow-binding-captcha
   model: authentik_flows.flowstagebinding
   attrs:
