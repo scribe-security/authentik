@@ -21,6 +21,7 @@ entries:
       authentication: require_unauthenticated
       layout: sidebar_right
     state: present
+# prompts
   - identifiers:
       name: default-recovery-field-password
     id: prompt-field-password
@@ -47,6 +48,7 @@ entries:
       order: 1
       placeholder_expression: false
     state: present
+# policies
   - identifiers:
       name: default-recovery-skip-if-restored
     id: default-recovery-skip-if-restored
@@ -55,6 +57,18 @@ entries:
       expression: |
         return bool(request.context.get('is_restored', True))
     state: present
+  - attrs:
+      expression: "if request.user.id is None:\n  return True\nif request.user.path\
+      \ is not None and request.user.path.startswith(\"goauthentik.io/sources\"):\n\
+      \  return True\nreturn not ak_is_group_member(request.user, name=\"sh-users\"\
+      )"
+    conditions: []
+    id: deny-password-reset-policy
+    identifiers:
+      name: deny-password-reset
+    model: authentik_policies_expression.expressionpolicy
+    state: present
+# stages
   - identifiers:
       name: default-recovery-email
     id: default-recovery-email
@@ -89,6 +103,13 @@ entries:
         - email
         - username
     state: present
+  - attrs:
+      deny_message: Password reset is not allowed for this user
+    id: default-recovery-deny
+    identifiers:
+      name: default-recovery-deny
+    model: authentik_stages_deny.denystage
+    state: present
   - identifiers:
       name: default-recovery-user-login
     id: default-recovery-user-login
@@ -102,9 +123,10 @@ entries:
       fields:
         - !KeyOf prompt-field-password
         - !KeyOf prompt-field-password-repeat
-      validation_policies: 
+      validation_policies:
         - !Find [authentik_policies_password.passwordpolicy, [name, scribe-password-policy]]
     state: present
+# stage bindings
   - identifiers:
       target: !KeyOf default-recovery-flow
       stage: !KeyOf default-recovery-identification
@@ -116,6 +138,17 @@ entries:
       re_evaluate_policies: true
       policy_engine_mode: any
       invalid_response_action: retry
+    state: present
+  - attrs:
+      invalid_response_action: retry
+      policy_engine_mode: any
+      re_evaluate_policies: true
+    id: default-recovery-deny-binding
+    identifiers:
+      order: 15
+      stage: !KeyOf default-recovery-deny
+      target: !KeyOf default-recovery-flow
+    model: authentik_flows.flowstagebinding
     state: present
   - identifiers:
       target: !KeyOf default-recovery-flow
@@ -130,7 +163,6 @@ entries:
       invalid_response_action: retry
     state: present
   - identifiers:
-      pk: 1219d06e-2c06-4c5b-a162-78e3959c6cf0
       target: !KeyOf default-recovery-flow
       stage: !KeyOf stages-prompt-password
       order: 30
@@ -163,6 +195,7 @@ entries:
       policy_engine_mode: any
       invalid_response_action: retry
     state: present
+# policy bindings
   - identifiers:
       policy: !KeyOf default-recovery-skip-if-restored
       target: !KeyOf flow-binding-identification
@@ -173,14 +206,12 @@ entries:
       enabled: true
       timeout: 30
     state: present
-  - identifiers:
-      policy: !KeyOf default-recovery-skip-if-restored
-      target: !KeyOf flow-binding-email
-      order: 0
-    state: absent
-    model: authentik_policies.policybinding
-    attrs:
-      negate: false
+  - attrs:
       enabled: true
       timeout: 30
+    identifiers:
+      order: 0
+      policy: !KeyOf deny-password-reset-policy
+      target: !KeyOf default-recovery-deny-binding
+    model: authentik_policies.policybinding
     state: present
