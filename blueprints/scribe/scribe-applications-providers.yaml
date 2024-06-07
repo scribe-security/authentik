@@ -13,6 +13,7 @@ context:
   scribe_service_app_name: !Format [scribe-service-app%s, !Env [AUTHENTIK_SCRIBE_ENVIRONMENT_SUFFIX, ""]]
   scribe_service_provider_name: !Format [scribe-service-provider%s, !Env [AUTHENTIK_SCRIBE_ENVIRONMENT_SUFFIX, ""]]
   sh_service_account_group_name: !Format [sh-service-accounts%s, !Env [AUTHENTIK_SCRIBE_ENVIRONMENT_SUFFIX, ""]]
+  sh_service_account_group_pk: !Env [AUTHENTIK_SERVICE_ACCOUNT_GROUP, null]
 
 entries:
 #dependencies
@@ -25,8 +26,9 @@ entries:
 # service account groups
 - model: authentik_core.group
   identifiers:
-    name: !Context sh_service_account_group_name
+    pk: !Context sh_service_account_group_pk
   attrs:
+    name: !Context sh_service_account_group_name
     attributes:
       is_superuser: false
   id: sh-service-accounts-group

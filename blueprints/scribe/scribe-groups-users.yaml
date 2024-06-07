@@ -62,7 +62,7 @@ entries:
 - attrs:
     key: !Context scribe_service_api_token
   state: created
-  conditions: 
+  conditions:
     - !If [!Context scribe_service_api_token]
   identifiers:
     identifier: scribe-service-api-token
