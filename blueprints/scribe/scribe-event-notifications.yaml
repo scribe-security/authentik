@@ -4,6 +4,12 @@ metadata:
 context:
   notification_webhook: !Env [AUTHENTIK_SCRIBE_HUB_NOTIFICATION_WEBHOOK, "changeme"]
 entries:
+#dependencies
+- attrs:
+    identifiers:
+      name: Scribe - Groups And Service Accounts
+    required: true
+  model: authentik_blueprints.metaapplyblueprint
 # event matcher policies
 - attrs:
     action: login
@@ -91,20 +97,9 @@ entries:
   model: authentik_events.notificationtransport
   state: present
 
-#group
-- attrs:
-    attributes: {}
-    name: scribe-hub-event-notifications
-  conditions: []
-  id: scribe-hub-event-notifications
-  identifiers:
-    name: scribe-hub-event-notifications
-  model: authentik_core.group
-  state: present
-
 #notification rule
 - attrs:
-    group: !KeyOf scribe-hub-event-notifications
+    group: !Find [authentik_core.group, [name, "sh-users"]]
     name: scribe-hub-notify-rule
     severity: notice
     transports:
