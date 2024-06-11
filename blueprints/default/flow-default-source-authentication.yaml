@@ -13,10 +13,9 @@ entries:
   state: present
 - attrs:
     identifiers:
-      name: Default - Source enrollment flow
+      name: Scribe - Enrollment Policies
     required: true
   model: authentik_blueprints.metaapplyblueprint
-  state: present
 #flow
 - attrs:
     designation: authentication
@@ -42,10 +41,33 @@ entries:
   id: default-source-authentication-login
   model: authentik_stages_user_login.userloginstage
 - identifiers:
-    order: 50
-    stage: !Find [authentik_stages_user_write.userwritestage , [name, default-source-enrollment-write]]
+    name: default-source-authentication-user-write
+  id: default-source-authentication-user-write
+  model: authentik_stages_user_write.userwritestage
+  attrs:
+    create_users_as_inactive: false
+    user_creation_mode: never_create
+  state: present
+- identifiers:
+    order: 0
+    stage: !KeyOf default-source-authentication-login
     target: !KeyOf flow
   model: authentik_flows.flowstagebinding
+- identifiers:
+    order: 50
+    stage: !KeyOf default-source-authentication-user-write
+    target: !KeyOf flow
+  id: user-write-binding
+  model: authentik_flows.flowstagebinding
+- identifiers:
+    order: 0
+    policy: !Find [ authentik_policies_expression.expressionpolicy, [name, default-enrollment-username-from-email ]]
+    target: !KeyOf user-write-binding
+  attrs:
+    enabled: true
+    order: 0
+    timeout: 30
+  model: authentik_policies.policybinding
 - identifiers:
     order: 70
     stage: !KeyOf default-source-authentication-login

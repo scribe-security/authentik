@@ -26,21 +26,17 @@ entries:
     model: authentik_policies_password.passwordpolicy
     state: present
   - attrs:
-      expression: 'email = request.context["prompt_data"]["email"]
-
-        # Store email in lowercase
-
-        request.context["prompt_data"]["email"] = email.lower()
-
-        # Direct set username to email
-
-        request.context["prompt_data"]["username"] = email.lower()
-
-        # Set username to email without domain
-
-        # request.context["prompt_data"]["username"] = email.split("@")[0]
-
-        return True'
+      expression: "email = request.context[\"prompt_data\"][\"email\"]\n\
+        name = request.context[\"prompt_data\"].get(\"name\")\n\
+        username = request.context[\"prompt_data\"].get(\"username\")\n\
+        # Store email in lowercase\n\
+        request.context[\"prompt_data\"][\"email\"] = email.lower()\n\
+        # Direct set username to email\n\
+        request.context[\"prompt_data\"][\"username\"] = email.lower()\n\
+        # Set name to username or email without domain\n\
+        if name is None:\n\
+        \  request.context[\"prompt_data\"][\"name\"] = username if username is not None else email.split(\"@\")[0]\n\
+        return True"
       name: default-enrollment-username-from-email
     conditions: []
     id: default-enrollment-username-from-email
