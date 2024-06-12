@@ -1,4 +1,5 @@
 name: Build-Authentik
+run-name: Build Authentik for ${{ inputs.environment }} environment from ${{ github.ref_name }} branch
 
 permissions:
   id-token: write
@@ -11,8 +12,11 @@ on:
         description: Select the Environment for Building the Image
         required: true
         options:
+          - dev
           - dev2
+          - ci
           - test
+          - staging
           - production
         type: choice
       with-sbom:
