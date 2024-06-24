@@ -7,9 +7,18 @@ entries:
 # policies
 - attrs:
     execution_logging: true
-    expression: !Format ["plan = request.context.get(\"flow_plan\")\nif not plan:\n    return False\nplan.redirect(\"%s\")\nreturn False", !Context scribe_hub_redirect_uri]
+    expression: !Format ["from django.http import QueryDict\n\
+      plan = request.context.get(\"flow_plan\")\n\
+      if not plan:\n\
+      \    return False\n\
+      q = QueryDict(request.http_request.GET.get(\"query\"))\n\
+      next = q.dict().get(\"next\", \"/\")\n\
+      if next != \"/\":\n\
+      \    return False\n\
+      plan.redirect(\"%s\")\n\
+      return False\n", !Context scribe_hub_redirect_uri]
     name: scribe-hub-redirect
-  conditions: 
+  conditions:
     - !If [!Context scribe_hub_redirect_uri]
   identifiers:
     name: scribe-hub-redirect
