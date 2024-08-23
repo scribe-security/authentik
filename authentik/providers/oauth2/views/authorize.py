@@ -513,6 +513,9 @@ class OAuthFulfillmentStage(StageView):
         """final Stage of an OAuth2 Flow"""
         if PLAN_CONTEXT_PARAMS not in self.executor.plan.context:
             LOGGER.warning("Got to fulfillment stage with no pending context")
+            LOGGER.warning("SH-5975 Flow: " + str(self.executor.plan.flow_pk))
+            LOGGER.warning("SH-5975 Context: " + str(self.executor.plan.context))
+
             return HttpResponseBadRequest()
         self.params: OAuthAuthorizationParams = self.executor.plan.context.pop(PLAN_CONTEXT_PARAMS)
         self.application: Application = self.executor.plan.context.pop(PLAN_CONTEXT_APPLICATION)
