@@ -181,7 +181,7 @@ class FlowExecutorView(APIView):
                     self.plan = None
                     self.cancel()
                 self._logger.debug("f(exec): Continuing existing plan")
-                self._logger.debug("SH-5975 Session: " + str(self.request.session))
+                self._logger.debug("SH-5975 Session: %s", dict(self.request.session))
                 self._logger.debug("SH-5975 Flow context: " + str(self.plan.context))
 
             # Initial flow request, check if we have an upstream query string passed in
