@@ -84,7 +84,7 @@ RUN --mount=type=secret,id=GEOIPUPDATE_ACCOUNT_ID \
 
 # Stage 5: Python dependencies
 FROM cgr.dev/chainguard/wolfi-base AS python-deps
-ARG PYTHON_VERSION=3.12.2
+ARG PYTHON_VERSION=3.12
 
 WORKDIR /ak-root/poetry
 
@@ -108,7 +108,7 @@ RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
 # Stage 6: Run
 FROM cgr.dev/chainguard/wolfi-base AS final-image
 
-ARG PYTHON_VERSION=3.12.2
+ARG PYTHON_VERSION=3.12
 ARG GIT_BUILD_HASH
 ARG VERSION
 ENV GIT_BUILD_HASH=$GIT_BUILD_HASH
