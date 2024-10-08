@@ -83,17 +83,20 @@ RUN --mount=type=secret,id=GEOIPUPDATE_ACCOUNT_ID \
     /bin/sh -c "/usr/bin/entry.sh || echo 'Failed to get GeoIP database, disabling'; exit 0"
 
 # Stage 5: Python dependencies
-FROM cgr.dev/chainguard/wolfi-base AS python-deps
-ARG PYTHON_VERSION=3.12
+FROM docker.io/python:3.12.2-slim-bookworm AS python-deps
 
 WORKDIR /ak-root/poetry
 
 ENV VENV_PATH="/ak-root/venv" \
     POETRY_VIRTUALENVS_CREATE=false \
     PATH="/ak-root/venv/bin:$PATH"
-    
-# Required for installing pip packages
-RUN apk add --no-cache python-${PYTHON_VERSION} py${PYTHON_VERSION}-pip build-base pkgconf xmlsec-dev zlib-dev postgresql-dev
+
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+RUN --mount=type=cache,id=apt-$TARGETARCH$TARGETVARIANT,sharing=locked,target=/var/cache/apt \
+    apt-get update && \
+    # Required for installing pip packages
+    apt-get install -y --no-install-recommends build-essential pkg-config libxmlsec1-dev zlib1g-dev libpq-dev
 
 RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
     --mount=type=bind,target=./poetry.lock,src=./poetry.lock \
@@ -124,7 +127,8 @@ WORKDIR /
 # We cannot cache this layer otherwise we'll end up with a bigger image
 RUN apk add --no-cache python-${PYTHON_VERSION} py${PYTHON_VERSION}-pip libpq openssl xmlsec libmaxminddb ca-certificates runit && \
     rm -rf /tmp/* /var/tmp/* && \
-    adduser --system --no-create-home --uid 1000 --group --home /authentik authentik && \
+    addgroup -S authentik && \
+    adduser --system --no-create-home --uid 1000 -G authentik --home /authentik authentik && \
     mkdir -p /certs /media /blueprints && \
     mkdir -p /authentik/.ssh && \
     mkdir -p /ak-root && \
