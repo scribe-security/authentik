@@ -93,7 +93,7 @@ ENV VENV_PATH="/ak-root/venv" \
     PATH="/ak-root/venv/bin:$PATH"
     
 # Required for installing pip packages
-RUN apk add --no-cache python3=${PYTHON_VERSION} py3-pip build-base pkgconf libxmlsec1 zlib-dev postgresql-dev
+RUN apk add --no-cache python3=${PYTHON_VERSION} py3-pip build-base pkgconf xmlsec1-dev zlib-dev postgresql-dev
 
 RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
     --mount=type=bind,target=./poetry.lock,src=./poetry.lock \
@@ -122,7 +122,7 @@ LABEL org.opencontainers.image.revision ${GIT_BUILD_HASH}
 WORKDIR /
 
 # We cannot cache this layer otherwise we'll end up with a bigger image
-RUN apk add --no-cache python3=${PYTHON_VERSION} py3-pip libpq openssl libxmlsec1 libmaxminddb ca-certificates runit && \
+RUN apk add --no-cache python3=${PYTHON_VERSION} py3-pip postgresql-libs openssl xmlsec1-openssl libmaxminddb ca-certificates runit && \
     rm -rf /tmp/* /var/tmp/* && \
     adduser --system --no-create-home --uid 1000 --group --home /authentik authentik && \
     mkdir -p /certs /media /blueprints && \
