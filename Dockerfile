@@ -84,7 +84,7 @@ RUN --mount=type=secret,id=GEOIPUPDATE_ACCOUNT_ID \
 
 # Stage 5: Python dependencies
 FROM cgr.dev/chainguard/wolfi-base AS python-deps
-ARG PYTHON_VERSION=3.12.2
+ARG PYTHON_VERSION=3.12
 
 WORKDIR /ak-root/poetry
 
@@ -93,7 +93,7 @@ ENV VENV_PATH="/ak-root/venv" \
     PATH="/ak-root/venv/bin:$PATH"
     
 # Required for installing pip packages
-RUN apk update && apk add --no-cache python3=${PYTHON_VERSION} py3-pip build-base pkgconf xmlsec-dev zlib-dev postgresql-dev
+RUN apk add --no-cache python-${PYTHON_VERSION} py${PYTHON_VERSION}-pip build-base pkgconf xmlsec-dev zlib-dev postgresql-dev
 
 RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
     --mount=type=bind,target=./poetry.lock,src=./poetry.lock \
@@ -108,7 +108,7 @@ RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
 # Stage 6: Run
 FROM cgr.dev/chainguard/wolfi-base AS final-image
 
-ARG PYTHON_VERSION=3.12.2
+ARG PYTHON_VERSION=3.12
 ARG GIT_BUILD_HASH
 ARG VERSION
 ENV GIT_BUILD_HASH=$GIT_BUILD_HASH
@@ -122,7 +122,7 @@ LABEL org.opencontainers.image.revision ${GIT_BUILD_HASH}
 WORKDIR /
 
 # We cannot cache this layer otherwise we'll end up with a bigger image
-RUN apk update && apk add --no-cache python3=${PYTHON_VERSION} py3-pip libpq openssl xmlsec libmaxminddb ca-certificates runit && \
+RUN apk add --no-cache python-${PYTHON_VERSION} py${PYTHON_VERSION}-pip libpq openssl xmlsec libmaxminddb ca-certificates runit && \
     rm -rf /tmp/* /var/tmp/* && \
     adduser --system --no-create-home --uid 1000 --group --home /authentik authentik && \
     mkdir -p /certs /media /blueprints && \
