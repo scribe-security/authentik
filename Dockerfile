@@ -122,7 +122,7 @@ LABEL org.opencontainers.image.revision ${GIT_BUILD_HASH}
 WORKDIR /
 
 # We cannot cache this layer otherwise we'll end up with a bigger image
-RUN apk add --no-cache python3=${PYTHON_VERSION} py3-pip postgresql-libs openssl xmlsec-openssl libmaxminddb ca-certificates runit && \
+RUN apk add --no-cache python3=${PYTHON_VERSION} py3-pip libpq openssl xmlsec libmaxminddb ca-certificates runit && \
     rm -rf /tmp/* /var/tmp/* && \
     adduser --system --no-create-home --uid 1000 --group --home /authentik authentik && \
     mkdir -p /certs /media /blueprints && \
