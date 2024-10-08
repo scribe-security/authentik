@@ -83,7 +83,7 @@ RUN --mount=type=secret,id=GEOIPUPDATE_ACCOUNT_ID \
     /bin/sh -c "/usr/bin/entry.sh || echo 'Failed to get GeoIP database, disabling'; exit 0"
 
 # Stage 5: Python dependencies
-FROM docker.io/python:3.12.2-slim-bookworm AS python-deps
+FROM cgr.dev/chainguard/wolfi-base AS python-deps
 
 WORKDIR /ak-root/poetry
 
@@ -109,7 +109,7 @@ RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
         poetry install --only=main --no-ansi --no-interaction --no-root"
 
 # Stage 6: Run
-FROM docker.io/python:3.12.2-slim-bookworm AS final-image
+FROM cgr.dev/chainguard/wolfi-base AS final-image
 
 ARG GIT_BUILD_HASH
 ARG VERSION
