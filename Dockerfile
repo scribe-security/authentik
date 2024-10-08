@@ -93,7 +93,7 @@ ENV VENV_PATH="/ak-root/venv" \
     PATH="/ak-root/venv/bin:$PATH"
     
 # Required for installing pip packages
-RUN apk update && apk add --no-cache python3 py3-pip build-base pkgconf xmlsec-dev zlib-dev postgresql-dev
+RUN apk update && apk add --no-cache python3=${PYTHON_VERSION} py3-pip build-base pkgconf xmlsec-dev zlib-dev postgresql-dev
 
 RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
     --mount=type=bind,target=./poetry.lock,src=./poetry.lock \
