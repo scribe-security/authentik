@@ -92,8 +92,6 @@ ENV VENV_PATH="/ak-root/venv" \
     POETRY_VIRTUALENVS_CREATE=false \
     PATH="/ak-root/venv/bin:$PATH"
 
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
-
 RUN --mount=type=cache,id=apt-$TARGETARCH$TARGETVARIANT,sharing=locked,target=/var/cache/apt \
     apt-get update && \
     # Required for installing pip packages
