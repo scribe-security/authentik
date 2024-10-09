@@ -109,8 +109,9 @@ RUN --mount=type=bind,target=./pyproject.toml,src=./pyproject.toml \
         poetry install --only=main --no-ansi --no-interaction --no-root"
 
 # Stage 6: Run
-FROM docker.io/python:3.12.2-slim-bookworm AS final-image
+FROM cgr.dev/chainguard/wolfi-base AS final-image
 
+ARG PYTHON_VERSION=3.12
 ARG GIT_BUILD_HASH
 ARG VERSION
 ENV GIT_BUILD_HASH=$GIT_BUILD_HASH
@@ -124,18 +125,15 @@ LABEL org.opencontainers.image.revision ${GIT_BUILD_HASH}
 WORKDIR /
 
 # We cannot cache this layer otherwise we'll end up with a bigger image
-RUN apt-get update && \
-    # Required for runtime
-    apt-get install -y --no-install-recommends libpq5 openssl libxmlsec1-openssl libmaxminddb0 ca-certificates && \
-    # Required for bootstrap & healtcheck
-    apt-get install -y --no-install-recommends runit && \
-    apt-get clean && \
-    rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/ && \
-    adduser --system --no-create-home --uid 1000 --group --home /authentik authentik && \
+RUN apk add --no-cache python-${PYTHON_VERSION} py${PYTHON_VERSION}-pip libpq openssl xmlsec libmaxminddb ca-certificates runit coreutils bash && \
+    rm -rf /tmp/* /var/tmp/* && \
+    addgroup -S authentik && \
+    adduser --system --no-create-home --uid 1000 -G authentik --home /authentik authentik && \
     mkdir -p /certs /media /blueprints && \
     mkdir -p /authentik/.ssh && \
     mkdir -p /ak-root && \
     chown authentik:authentik /certs /media /authentik/.ssh /ak-root
+
 
 COPY ./authentik/ /authentik
 COPY ./pyproject.toml /
